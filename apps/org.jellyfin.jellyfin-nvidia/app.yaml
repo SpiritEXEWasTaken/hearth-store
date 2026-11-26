@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=../../schema/app.schema.json
+id: org.jellyfin.jellyfin-nvidia
+name: Jellyfin (Nvidia)
+summary: Your own streaming service for movies, shows and music
+description: |
+  Jellyfin organises your movies, TV shows, music and photos with posters and descriptions, and
+  streams them to phones, TVs, browsers and game consoles. It's free, with no accounts on
+  someone else's server and no tracking.
+
+  Point it at the folder with your media and it does the rest. With a graphics chip it can
+  convert videos on the fly for devices that can't play the original format.
+category: media
+tags: [movies, tv, music, streaming, plex alternative]
+upstream:
+  website: https://jellyfin.org
+  source: https://github.com/jellyfin/jellyfin
+  docs: https://jellyfin.org/docs/
+license: GPL-2.0-only
+icon: icon.svg
+screenshots:
+  - file: screenshots/1.jpg
+    caption: The first-run setup wizard
+    source: own
+app_name: jellyfin-nvidia
+web:
+  service: jellyfin
+  port_env: WEB_PORT
+  health: /health
+  https: recommended
+requirements:
+  ram_mb: 512
+  ram_recommended_mb: 2048
+  data_mb: 1000
+  architectures: [amd64, arm64]
+  gpu: optional
+notice: No movies, TV shows or music are provided. Jellyfin plays the media you already have.
+ports:
+  - {env: WEB_PORT, port: 8096, label: Web page}
+  - {env: DISCOVERY_PORT, port: 7359, protocol: udp, label: Lets apps on your network find the server, movable: false}
+options:
+  - id: media
+    kind: folder
+    label: Where are your movies, shows and music?
+    help: Jellyfin reads this folder (it doesn't change your files). You can add more folders later.
+    default: ${APP_DATA}/media
+    env: MEDIA
+  - id: gpu
+    kind: gpu
+    label: Hardware video conversion
+    help: Converts videos with the graphics chip instead of the CPU, so streams start faster and use less power.
+    default: auto
+    choices:
+      - id: none
+        label: Off (CPU only)
+      - id: vaapi
+        label: Intel or AMD graphics (VAAPI / Quick Sync)
+        needs: dri
+        variants: [vaapi]
+      - id: nvidia
+        label: Nvidia graphics (NVENC)
+        needs: nvidia
+        variants: [nvidia]
+data_dirs:
+  - {path: config, owner: user}
+  - {path: cache, owner: user}
+  - {path: media, owner: user}
+backup_exclude: [/cache]
+after_install:
+  - Open the web page and follow the setup wizard; your media folder is at /media inside Jellyfin.
+  - With hardware conversion on, also turn it on in Dashboard → Playback → Transcoding.
