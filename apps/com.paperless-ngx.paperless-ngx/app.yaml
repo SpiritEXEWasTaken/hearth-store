@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=../../schema/app.schema.json
+id: com.paperless-ngx.paperless-ngx
+name: Paperless-ngx
+summary: Scan, file and search all your paper documents
+description: |
+  Paperless-ngx turns letters, bills and receipts into a searchable archive. Drop scans or PDFs
+  into its folder (or upload them), and it reads the text, tags them, and finds the right
+  correspondent and date automatically.
+
+  Turn on Office documents to also read Word, Excel and email files.
+category: documents
+tags: [documents, ocr, scanning, pdf, archive]
+upstream:
+  website: https://docs.paperless-ngx.com
+  source: https://github.com/paperless-ngx/paperless-ngx
+  docs: https://docs.paperless-ngx.com/setup/
+license: GPL-3.0-only
+icon: icon.svg
+screenshots:
+  - file: screenshots/1.jpg
+    caption: Sign-in page
+    source: own
+app_name: paperless
+web:
+  service: webserver
+  port_env: WEB_PORT
+  https: recommended
+requirements:
+  ram_mb: 1024
+  ram_recommended_mb: 2048
+  data_mb: 1000
+  architectures: [amd64, arm64]
+ports:
+  - {env: WEB_PORT, port: 8010, label: Web page}
+env:
+  DB_PASSWORD: {generate: password}
+  SECRET_KEY: {generate: hex32}
+  ADMIN_PASSWORD: {generate: password, show_as: "Admin password (user: admin)"}
+options:
+  - id: consume
+    kind: folder
+    label: Folder for new documents
+    help: Paperless picks up every file put here (for example by your scanner) and files it.
+    default: ${APP_DATA}/consume
+    env: CONSUME
+  - id: language
+    kind: choice
+    label: Language of your documents (for text recognition)
+    default: eng
+    choices:
+      - {id: eng, label: English, env: {OCR_LANGUAGE: eng}}
+      - {id: deu, label: German, env: {OCR_LANGUAGE: deu}}
+      - {id: fra, label: French, env: {OCR_LANGUAGE: fra}}
+      - {id: spa, label: Spanish, env: {OCR_LANGUAGE: spa}}
+      - {id: ita, label: Italian, env: {OCR_LANGUAGE: ita}}
+      - {id: nld, label: Dutch, env: {OCR_LANGUAGE: nld}}
+  - id: office
+    kind: switch
+    label: Office documents and emails (Tika + Gotenberg)
+    help: Reads .docx, .xlsx, .odt and .eml files. Uses about 500 MB more RAM.
+    default: "false"
+    on: {variants: [office]}
+data_dirs:
+  - {path: data, owner: user}
+  - {path: media, owner: user}
+  - {path: export, owner: user}
+  - {path: consume, owner: user}
+  - {path: pgdata}
+after_install:
+  - Sign in as admin; the password is under "Show sign-in details" on this page (change it in your profile).

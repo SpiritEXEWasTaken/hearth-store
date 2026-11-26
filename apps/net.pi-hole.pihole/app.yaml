@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=../../schema/app.schema.json
+id: net.pi-hole.pihole
+name: Pi-hole
+summary: Network-wide ad blocking through your own DNS server
+description: |
+  Pi-hole blocks ads and trackers for every device on your network by answering DNS requests
+  for ad domains with nothing. It shows which devices ask for what, and you can allow or block
+  sites with one click.
+
+  After installing, set your router's DNS server to this server's address. Only one DNS blocker
+  can use port 53, so Pi-hole and AdGuard Home can't run side by side.
+category: network
+tags: [dns, ad blocker, privacy]
+upstream:
+  website: https://pi-hole.net
+  source: https://github.com/pi-hole/docker-pi-hole
+  docs: https://docs.pi-hole.net/docker/
+license: EUPL-1.2
+icon: icon.svg
+screenshots:
+  - file: screenshots/1.jpg
+    caption: Sign-in page of the admin dashboard
+    source: own
+app_name: pihole
+web:
+  service: pihole
+  port_env: WEB_PORT
+  path: /admin/
+requirements:
+  ram_mb: 64
+  ram_recommended_mb: 256
+  data_mb: 200
+  architectures: [amd64, arm64]
+ports:
+  - {env: DNS_PORT, port: 53, label: DNS, movable: false}
+  - {env: DNS_PORT, port: 53, protocol: udp, label: DNS, movable: false}
+  - {env: WEB_PORT, port: 8053, label: Web page}
+env:
+  WEB_PASSWORD: {generate: password, show_as: Web page password}
+data_dirs:
+  - {path: etc-pihole}
+after_install:
+  - Sign in with the password under "Show sign-in details" on this page, then set your router's DNS server to this server's address.

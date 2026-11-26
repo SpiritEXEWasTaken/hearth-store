@@ -1,0 +1,89 @@
+name: store
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 5 * * 2" # weekly: refresh image sizes and re-check the registries
+
+permissions:
+  contents: read
+
+concurrency:
+  group: store-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: lint, compose, registry, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Which hearth-store tool
+        id: tool
+        run: echo "rev=$(git ls-remote https://github.com/SpiritEXEWasTaken/hearth refs/heads/main | cut -f1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: ~/.cargo/bin/hearth-store
+          key: hearth-store-${{ steps.tool.outputs.rev }}
+      - name: Install hearth-store
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: cargo install --locked --git https://github.com/SpiritEXEWasTaken/hearth --rev ${{ steps.tool.outputs.rev }} --features tool hearth-store
+      - name: Lint (format, pins, duplicates, files, ports, variables)
+        run: hearth-store lint .
+      - name: Every combination of install options through docker compose
+        run: |
+          hearth-store combos . --out /tmp/combos
+          for d in /tmp/combos/*/; do
+            (cd "$d" && docker compose config -q) || { echo "::error::$(basename "$d"): $(cat "$d/options.txt")"; exit 1; }
+          done
+      - name: Registry and CPU types
+        run: hearth-store images . --out images.json
+      - name: Build catalog and site
+        run: hearth-store build . --out dist --images images.json --commit ${{ github.sha }}
+      - uses: actions/upload-artifact@v6
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+  publish:
+    name: sign and publish
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v6
+        with:
+          name: dist
+          path: dist
+      - name: Which hearth-store tool
+        id: tool
+        run: echo "rev=$(git ls-remote https://github.com/SpiritEXEWasTaken/hearth refs/heads/main | cut -f1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/.cargo/bin/hearth-store
+          key: hearth-store-${{ steps.tool.outputs.rev }}
+          fail-on-cache-miss: true
+      - name: Sign index.json
+        env:
+          HEARTH_STORE_KEY: ${{ secrets.HEARTH_STORE_KEY }}
+          HEARTH_STORE_KEY_PASSWORD: ${{ secrets.HEARTH_STORE_KEY_PASSWORD }}
+        run: hearth-store sign dist/index.json
+      - name: Check it the way Hearth will (built-in trusted keys)
+        run: hearth-store verify dist
+      - run: mkdir -p dist/schema && cp schema/app.schema.json dist/schema/
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+      - id: deploy
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,407 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://spiritexewastaken.github.io/hearth-store/schema/app.schema.json",
+  "title": "Hearth store entry (apps/<id>/app.yaml)",
+  "description": "For editors. The hearth-store tool (lint) is the authority and checks more than this.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "summary",
+    "description",
+    "category",
+    "upstream",
+    "license",
+    "icon",
+    "app_name",
+    "requirements"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*(\\.[a-z0-9][a-z0-9-]*)+$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 90
+    },
+    "description": {
+      "type": "string"
+    },
+    "category": {
+      "enum": [
+        "media",
+        "photos",
+        "files",
+        "home",
+        "security",
+        "network",
+        "documents",
+        "ai",
+        "gaming",
+        "productivity",
+        "monitoring",
+        "development",
+        "downloads",
+        "communication",
+        "other"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "upstream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "website",
+        "source"
+      ],
+      "properties": {
+        "website": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "docs": {
+          "type": "string"
+        }
+      }
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX id"
+    },
+    "icon": {
+      "type": "string",
+      "pattern": "\\.(svg|png)$"
+    },
+    "screenshots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "file",
+          "caption",
+          "source"
+        ],
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "description": "'own' or the upstream URL"
+          },
+          "license": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "app_name": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{1,40}$"
+    },
+    "web": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "service"
+      ],
+      "properties": {
+        "service": {
+          "type": "string"
+        },
+        "port_env": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "path": {
+          "type": "string"
+        },
+        "health": {
+          "type": "string"
+        },
+        "https": {
+          "enum": [
+            "no",
+            "recommended",
+            "required"
+          ]
+        },
+        "dashboard": {
+          "type": "boolean"
+        }
+      }
+    },
+    "requirements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ram_mb",
+        "data_mb",
+        "architectures"
+      ],
+      "properties": {
+        "ram_mb": {
+          "type": "integer"
+        },
+        "ram_recommended_mb": {
+          "type": "integer"
+        },
+        "data_mb": {
+          "type": "integer"
+        },
+        "architectures": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "amd64",
+              "arm64",
+              "arm"
+            ]
+          }
+        },
+        "gpu": {
+          "enum": [
+            "none",
+            "optional",
+            "recommended",
+            "required"
+          ]
+        },
+        "host_network": {
+          "type": "boolean"
+        }
+      }
+    },
+    "notice": {
+      "type": "string"
+    },
+    "ports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "port",
+          "label"
+        ],
+        "properties": {
+          "env": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "protocol": {
+            "enum": [
+              "tcp",
+              "udp"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "movable": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "generate": {
+            "enum": [
+              "password",
+              "hex32"
+            ]
+          },
+          "show_as": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "kind",
+          "label",
+          "default"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "choice",
+              "gpu",
+              "switch",
+              "folder",
+              "text"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "help": {
+            "type": "string"
+          },
+          "default": {
+            "type": "string"
+          },
+          "env": {
+            "type": "string"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "label"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "help": {
+                  "type": "string"
+                },
+                "needs": {
+                  "enum": [
+                    "dri",
+                    "intel",
+                    "amd",
+                    "nvidia"
+                  ]
+                },
+                "variants": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "env": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "on": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "variants": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "env": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "off": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "variants": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "env": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "data_dirs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "owner": {
+            "enum": [
+              "root",
+              "user"
+            ]
+          }
+        }
+      }
+    },
+    "pin_reasons": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "backup_exclude": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "after_install": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

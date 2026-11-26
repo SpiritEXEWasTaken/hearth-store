@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=../../schema/app.schema.json
+id: com.github.9001.copyparty
+name: copyparty
+summary: Fast file server in your browser, with uploads, search and media
+description: |
+  copyparty shares a folder through the web: browse, upload (resumable, any size), download as
+  zip, search, play music and video, and view pictures with thumbnails. It also speaks WebDAV,
+  FTP and SFTP if you turn them on.
+
+  Hearth sets it up with one admin account that has full access to the shared folder; nobody
+  else can see anything until you add accounts in its config.
+category: files
+tags: [files, sharing, upload, webdav, nas]
+upstream:
+  website: https://github.com/9001/copyparty
+  source: https://github.com/9001/copyparty
+  docs: https://github.com/9001/copyparty/tree/hovudstraum/scripts/docker
+license: MIT
+icon: icon.svg
+screenshots:
+  - file: screenshots/1.jpg
+    caption: Browsing the shared folder as admin
+    source: own
+app_name: copyparty
+web:
+  service: copyparty
+  port_env: WEB_PORT
+requirements:
+  ram_mb: 64
+  ram_recommended_mb: 512
+  data_mb: 200
+  architectures: [amd64, arm64]
+ports:
+  - {env: WEB_PORT, port: 3923, label: Web page}
+env:
+  ADMIN_PASSWORD: {generate: password, show_as: "Admin password (user: admin)"}
+options:
+  - id: share
+    kind: folder
+    label: Folder to share
+    default: ${APP_DATA}/share
+    env: SHARE
+  - id: edition
+    kind: choice
+    label: Edition
+    help: Bigger editions make more kinds of thumbnails. "Media" is what copyparty recommends.
+    default: ac
+    choices:
+      - {id: min, label: "Small: just file sharing, no thumbnails", variants: [min]}
+      - {id: im, label: "Pictures: image thumbnails and music tags", variants: [im]}
+      - {id: ac, label: "Media: also video thumbnails and audio conversion (recommended)"}
+      - {id: iv, label: "Media+: more picture formats", variants: [iv]}
+      - {id: dj, label: "DJ: also detects musical key and BPM", variants: [dj]}
+data_dirs:
+  - {path: cfg, owner: user}
+  - {path: share, owner: user}
+after_install:
+  - Sign in as admin; the password is under "Show sign-in details" on this page.
+  - More users, shares and settings go in .conf files in the app's cfg folder (see copyparty's docs).

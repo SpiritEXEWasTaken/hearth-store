@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=../../schema/app.schema.json
+id: io.home-assistant.home-assistant
+name: Home Assistant
+summary: Control and automate your smart home, locally
+description: |
+  Home Assistant brings lights, plugs, thermostats, cameras, sensors and thousands of other
+  devices together in one app, and runs automations ("turn the porch light on at sunset")
+  on your own server, so they keep working without the internet.
+
+  This is the container version: it has no built-in add-on store. Hearth offers companion apps
+  such as an MQTT broker or Matter server as separate store apps instead.
+category: home
+tags: [smart home, automation, iot, zigbee, matter]
+upstream:
+  website: https://www.home-assistant.io
+  source: https://github.com/home-assistant/core
+  docs: https://www.home-assistant.io/installation/linux#docker-compose
+license: Apache-2.0
+icon: icon.svg
+screenshots:
+  - file: screenshots/1.jpg
+    caption: "Onboarding: create your smart home"
+    source: own
+app_name: home-assistant
+web:
+  service: homeassistant
+  port: 8123
+  https: recommended
+requirements:
+  ram_mb: 512
+  ram_recommended_mb: 2048
+  data_mb: 1000
+  architectures: [amd64, arm64]
+  host_network: true
+ports:
+  - {port: 8123, label: Web page and phone app, movable: false}
+data_dirs:
+  - {path: config}
+after_install:
+  - Open the web page and create your account; Home Assistant then finds devices on your network.
+  - For HTTPS, turn it on in the app's HTTPS card; Hearth adds the proxy settings Home Assistant needs.

@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=../../schema/app.schema.json
+id: com.adguard.adguardhome
+name: AdGuard Home
+summary: Block ads and trackers for every device on your network
+description: |
+  AdGuard Home answers your network's DNS questions and quietly drops the ones that lead to ads,
+  trackers and known malware sites. It works for every device, including smart TVs and phones,
+  without installing anything on them.
+
+  After installing, set your router's DNS server to this server's address. Only one DNS blocker
+  can use port 53, so AdGuard Home and Pi-hole can't run side by side.
+category: network
+tags: [dns, ad blocker, privacy, pi-hole alternative]
+upstream:
+  website: https://adguard.com/en/adguard-home/overview.html
+  source: https://github.com/AdguardTeam/AdGuardHome
+  docs: https://github.com/AdguardTeam/AdGuardHome/wiki/Docker
+license: GPL-3.0-only
+icon: icon.svg
+screenshots:
+  - file: screenshots/1.jpg
+    caption: The setup wizard
+    source: own
+app_name: adguard-home
+web:
+  service: adguardhome
+  port_env: WEB_PORT
+requirements:
+  ram_mb: 64
+  ram_recommended_mb: 256
+  data_mb: 200
+  architectures: [amd64, arm64]
+ports:
+  - {env: DNS_PORT, port: 53, label: DNS, movable: false}
+  - {env: DNS_PORT, port: 53, protocol: udp, label: DNS, movable: false}
+  - {env: WEB_PORT, port: 3080, label: Web page}
+data_dirs:
+  - {path: work}
+  - {path: conf}
+after_install:
+  - "In the setup wizard, keep the admin web interface on port 3000 and DNS on port 53: these are the ports inside the container, and Hearth already connects them."
+  - Then set your router's DNS server to this server's address.

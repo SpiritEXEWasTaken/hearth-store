@@ -1,0 +1,42 @@
+services:
+  broker:
+    image: docker.io/valkey/valkey:9-alpine
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+  db:
+    image: docker.io/library/postgres:18
+    volumes:
+      - ${APP_DATA}/pgdata:/var/lib/postgresql
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    restart: unless-stopped
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    depends_on:
+      - db
+      - broker
+    ports:
+      - "${WEB_PORT}:8000"
+    volumes:
+      - ${APP_DATA}/data:/usr/src/paperless/data
+      - ${APP_DATA}/media:/usr/src/paperless/media
+      - ${APP_DATA}/export:/usr/src/paperless/export
+      - ${CONSUME}:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBENGINE: postgresql
+      PAPERLESS_DBPASS: ${DB_PASSWORD}
+      PAPERLESS_SECRET_KEY: ${SECRET_KEY}
+      PAPERLESS_ADMIN_USER: admin
+      PAPERLESS_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      PAPERLESS_OCR_LANGUAGE: ${OCR_LANGUAGE}
+      PAPERLESS_TIME_ZONE: ${TZ}
+      USERMAP_UID: ${PUID}
+      USERMAP_GID: ${PGID}
+    restart: unless-stopped
+volumes:
+  redisdata:

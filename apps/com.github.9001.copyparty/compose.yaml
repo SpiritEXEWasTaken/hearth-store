@@ -1,0 +1,24 @@
+services:
+  copyparty:
+    image: copyparty/ac:latest
+    user: "${PUID}:${PGID}"
+    ports:
+      - "${WEB_PORT}:3923"
+    volumes:
+      - ${APP_DATA}/cfg:/cfg
+      - ${SHARE}:/w
+    command:
+      - -a
+      - admin:${ADMIN_PASSWORD}
+      - -v
+      - /w::A,admin
+    environment:
+      PYTHONUNBUFFERED: "1"
+    stop_grace_period: 15s
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q 127.0.0.1:3923/?reset=/._"]
+      interval: 1m
+      timeout: 2s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped

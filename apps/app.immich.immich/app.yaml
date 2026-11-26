@@ -1,0 +1,80 @@
+# yaml-language-server: $schema=../../schema/app.schema.json
+id: app.immich.immich
+name: Immich
+summary: Photo and video backup from your phone, like Google Photos at home
+description: |
+  Immich backs up the photos and videos from your phones automatically and shows them in a fast
+  timeline, with albums, sharing, a map, and memories from past years.
+
+  With machine learning on, it recognises faces and lets you search your photos by what's in
+  them ("dog on the beach"). That part runs on your server; nothing is sent anywhere.
+category: photos
+tags: [photos, videos, backup, google photos alternative]
+upstream:
+  website: https://immich.app
+  source: https://github.com/immich-app/immich
+  docs: https://docs.immich.app
+license: AGPL-3.0-only
+icon: icon.svg
+screenshots:
+  - file: screenshots/1.jpg
+    caption: The welcome page before creating the admin account
+    source: own
+app_name: immich
+web:
+  service: immich-server
+  port_env: WEB_PORT
+  health: /api/server/ping
+  https: recommended
+requirements:
+  ram_mb: 4096
+  ram_recommended_mb: 6144
+  data_mb: 3000
+  architectures: [amd64, arm64]
+  gpu: optional
+ports:
+  - {env: WEB_PORT, port: 2283, label: Web page and phone app}
+env:
+  DB_PASSWORD: {generate: password}
+options:
+  - id: library
+    kind: folder
+    label: Where should photos and videos be stored?
+    help: Needs plenty of space. Everything uploaded from phones goes here.
+    default: ${APP_DATA}/library
+    env: UPLOAD_LOCATION
+  - id: gpu
+    kind: gpu
+    label: Graphics acceleration
+    help: Uses the graphics chip for video conversion (and for machine learning with Intel or Nvidia).
+    default: auto
+    choices:
+      - id: none
+        label: Off (CPU only)
+      - id: intel
+        label: Intel graphics (Quick Sync + OpenVINO)
+        needs: intel
+        variants: [vaapi, ml-openvino]
+      - id: vaapi
+        label: AMD or other graphics (VAAPI video only)
+        needs: dri
+        variants: [vaapi]
+      - id: nvidia
+        label: Nvidia graphics (NVENC + CUDA)
+        needs: nvidia
+        variants: [nvenc, ml-cuda]
+  - id: ml
+    kind: switch
+    label: Machine learning (faces, smart search)
+    help: Uses about 1-2 GB more RAM. Turn off on small servers.
+    default: "true"
+    off: {variants: [no-ml]}
+data_dirs:
+  - {path: library}
+  - {path: postgres}
+backup_exclude: [/data/thumbs, /data/encoded-video]
+pin_reasons:
+  ghcr.io/immich-app/postgres: Immich needs this exact Postgres build with its vector search extensions (from Immich's own compose file).
+after_install:
+  - Open the web page and create the admin account (the first account is the admin).
+  - Install the Immich app on your phone and sign in with this server's address.

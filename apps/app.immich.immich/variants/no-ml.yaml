@@ -1,0 +1,5 @@
+x-remove-services: [immich-machine-learning]
+services:
+  immich-server:
+    environment:
+      IMMICH_MACHINE_LEARNING_ENABLED: "false"

@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=../../schema/app.schema.json
+id: com.github.dani-garcia.vaultwarden
+name: Vaultwarden
+summary: Password manager server that works with the Bitwarden apps
+description: |
+  Vaultwarden keeps your passwords, passkeys and notes on your own server. You use it with the
+  official Bitwarden apps and browser extensions on every device, which sync through it.
+
+  It's a light, unofficial server written in Rust that runs comfortably on small machines. The
+  official Bitwarden server is heavier and needs a licence key from bitwarden.com.
+category: security
+tags: [passwords, bitwarden, passkeys, 2fa]
+upstream:
+  website: https://github.com/dani-garcia/vaultwarden
+  source: https://github.com/dani-garcia/vaultwarden
+  docs: https://github.com/dani-garcia/vaultwarden/wiki
+license: AGPL-3.0-only
+icon: icon.svg
+screenshots:
+  - file: screenshots/1.jpg
+    caption: The web vault sign-in page
+    source: own
+app_name: vaultwarden
+web:
+  service: vaultwarden
+  port_env: WEB_PORT
+  health: /alive
+  https: required
+requirements:
+  ram_mb: 64
+  ram_recommended_mb: 256
+  data_mb: 100
+  architectures: [amd64, arm64]
+ports:
+  - {env: WEB_PORT, port: 8222, label: Web vault and apps}
+options:
+  - id: signups
+    kind: switch
+    label: Allow new accounts
+    help: Turn this off after you and your family have made your accounts.
+    default: "true"
+    on: {env: {SIGNUPS_ALLOWED: "true"}}
+    off: {env: {SIGNUPS_ALLOWED: "false"}}
+data_dirs:
+  - {path: data}
+after_install:
+  - The Bitwarden apps and the web vault only work over HTTPS. Hearth turns on HTTPS for this app; use that https:// address everywhere.
+  - In the Bitwarden app, choose "self-hosted" and enter the https:// address.

@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=../../schema/app.schema.json
+id: app.romm.romm
+name: RomM
+summary: A beautiful library for your retro game collection
+description: |
+  RomM scans your game files, fetches covers, descriptions and screenshots, and shows your whole
+  collection in a clean web library. You can play many systems right in the browser, and keep
+  saves and states in one place.
+
+  Put your games in the library folder, one folder per system (for example roms/snes), then
+  scan from RomM's web page.
+category: gaming
+tags: [games, emulation, retro, roms]
+upstream:
+  website: https://romm.app
+  source: https://github.com/rommapp/romm
+  docs: https://docs.romm.app
+license: AGPL-3.0-only
+icon: icon.svg
+screenshots:
+  - file: screenshots/1.jpg
+    caption: "Setup: choosing which game systems to manage"
+    source: own
+app_name: romm
+web:
+  service: romm
+  port_env: WEB_PORT
+requirements:
+  ram_mb: 512
+  ram_recommended_mb: 2048
+  data_mb: 2000
+  architectures: [amd64, arm64]
+notice: No ROMs or BIOS files are included. RomM organises and plays games you already own.
+ports:
+  - {env: WEB_PORT, port: 8098, label: Web page}
+env:
+  DB_PASSWORD: {generate: password}
+  DB_ROOT_PASSWORD: {generate: password}
+  AUTH_SECRET: {generate: hex32}
+options:
+  - id: library
+    kind: folder
+    label: Where is your game library?
+    help: One folder per system inside a roms folder, e.g. library/roms/gba. See RomM's docs for the names.
+    default: ${APP_DATA}/library
+    env: LIBRARY
+data_dirs:
+  - {path: library}
+  - {path: assets}
+  - {path: config}
+after_install:
+  - Open the web page and create the admin account, then scan your library.
+  - For covers and descriptions, add metadata provider keys (IGDB, ScreenScraper) in RomM's settings.

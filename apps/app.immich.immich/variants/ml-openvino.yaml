@@ -1,0 +1,5 @@
+services:
+  immich-machine-learning:
+    image: ghcr.io/immich-app/immich-machine-learning:v3-openvino
+    devices:
+      - /dev/dri:/dev/dri

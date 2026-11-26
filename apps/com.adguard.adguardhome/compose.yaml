@@ -1,0 +1,11 @@
+services:
+  adguardhome:
+    image: adguard/adguardhome:latest
+    volumes:
+      - ${APP_DATA}/work:/opt/adguardhome/work
+      - ${APP_DATA}/conf:/opt/adguardhome/conf
+    ports:
+      - "${DNS_PORT}:53/tcp"
+      - "${DNS_PORT}:53/udp"
+      - "${WEB_PORT}:3000/tcp"
+    restart: unless-stopped

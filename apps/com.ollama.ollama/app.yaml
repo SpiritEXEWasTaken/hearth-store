@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=../../schema/app.schema.json
+id: com.ollama.ollama
+name: Ollama
+summary: Run AI language models on your own server
+description: |
+  Ollama downloads and runs open AI models (Llama, Qwen, Gemma, Mistral, DeepSeek and many
+  more) on your server, so chats and code never leave your home. Other apps use it through its
+  API, for example Open WebUI for a ChatGPT-like page.
+
+  Models need a lot of memory: small ones fit in 8 GB of RAM, bigger ones want a graphics card.
+  Ollama has no web page of its own.
+category: ai
+tags: [ai, llm, chat, local ai]
+upstream:
+  website: https://ollama.com
+  source: https://github.com/ollama/ollama
+  docs: https://docs.ollama.com/docker
+license: MIT
+icon: icon.svg
+screenshots:
+  - file: screenshots/1.jpg
+    caption: Ollama in Hearth (it has no web page of its own)
+    source: own
+app_name: ollama
+web:
+  service: ollama
+  port_env: API_PORT
+  dashboard: false
+requirements:
+  ram_mb: 2048
+  ram_recommended_mb: 8192
+  data_mb: 5000
+  architectures: [amd64, arm64]
+  gpu: recommended
+ports:
+  - {env: API_PORT, port: 11434, label: API for other apps}
+options:
+  - id: gpu
+    kind: gpu
+    label: Graphics card
+    help: Models run many times faster on a supported graphics card.
+    default: auto
+    choices:
+      - id: none
+        label: Off (CPU only)
+      - id: nvidia
+        label: Nvidia (CUDA)
+        needs: nvidia
+        variants: [nvidia]
+      - id: amd
+        label: AMD (ROCm)
+        needs: amd
+        variants: [rocm]
+data_dirs:
+  - {path: models}
+after_install:
+  - Ollama starts with no models. Picking and downloading models from Hearth comes with guided setup; until then, apps such as Open WebUI can download them.
